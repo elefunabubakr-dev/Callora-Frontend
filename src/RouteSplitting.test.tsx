@@ -7,6 +7,7 @@ import App, { prefetchRoute } from './App';
 import { AccountProvider } from './hooks/useAccountContext';
 import { ThemeProvider } from './ThemeContext';
 import { CollectionsProvider } from './state/collectionsStore';
+import { ToastProvider } from './components/Toast';
 
 function renderApp(initialPath = '/') {
   return render(
@@ -14,7 +15,10 @@ function renderApp(initialPath = '/') {
       <CollectionsProvider>
         <AccountProvider>
           <MemoryRouter initialEntries={[initialPath]}>
-            <App />
+            {/* Mirrors src/main.tsx: ToastProvider wraps every route render path. */}
+            <ToastProvider>
+              <App />
+            </ToastProvider>
           </MemoryRouter>
         </AccountProvider>
       </CollectionsProvider>
@@ -45,7 +49,7 @@ describe('Route Splitting and Responsiveness Suite (Quality-2)', () => {
 
   it('renders the landing route synchronously without route loading fallback delay', async () => {
     renderApp('/');
-    expect(screen.getByText(/Secure USDC funding for premium API usage/i)).toBeTruthy();
+    expect(screen.getByRole('link', { name: 'Callora home' })).toBeTruthy();
     const primaryNav = screen.getByRole('navigation', { name: 'Primary navigation' });
     expect(within(primaryNav).getByRole('link', { name: 'Dashboard' })).toBeTruthy();
     expect(within(primaryNav).getByRole('link', { name: 'Marketplace' })).toBeTruthy();
@@ -96,7 +100,7 @@ describe('Route Splitting and Responsiveness Suite (Quality-2)', () => {
 
   it('handles rapid route transitions via navigation without race conditions or error state', async () => {
     renderApp('/');
-    const primaryNav = screen.getByRole('navigation', { name: 'Primary navigation' });
+    const primaryNav = screen.getByRole('navigation', { name: 'Footer navigation' });
 
     const themeLink = within(primaryNav).getByRole('link', { name: 'Theme Playground' });
     fireEvent.click(themeLink);
